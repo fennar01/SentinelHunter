@@ -2,6 +2,16 @@
 
 SentinelHunter is a mesh-based mission software stack for deployment on existing satellite constellations (e.g., Iridium, Starlink, military) to detect and track rogue 'killer' satellites using RF, Doppler, and optical signatures. The system supports multi-satellite collaboration, real-time mesh networking, and a unified ground operator GUI.
 
+## User Interface Mockups
+
+**Mesh Network Overview and Live Telemetry**
+
+![SentinelHunter UI Main](https://imgur.com/gKjSBFG.png)
+
+**Detection Event Detail and Threat Classification**
+
+![SentinelHunter UI Event Detail](https://imgur.com/MdytJcr.png)
+
 ## Architecture
 - **Node:** Each satellite runs a lightweight SentinelHunter node, capable of local detection, telemetry, and mesh communication.
 - **Mesh Network:** Nodes communicate and share detection/telemetry data using a mesh protocol (simulated with ZeroMQ for development).
