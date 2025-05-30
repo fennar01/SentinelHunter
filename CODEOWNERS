@@ -1,0 +1,7 @@
+# CODEOWNERS
+/src/flight/ @core-team
+/src/gui/ @frontend
+/src/detection/ @sensor-fusion
+/sim/ @devops
+/tests/ @devops
+/docs/ @devops

@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Set up C++
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: clang
+      - name: Install pre-commit
+        run: pip install pre-commit
+      - name: Run pre-commit
+        run: pre-commit run --all-files
+      - name: Build simulator
+        run: docker build -t sentinel-sim ./sim
+      - name: Simulator smoke test
+        run: docker run --rm sentinel-sim
+      - name: Run Python tests
+        run: |
+          pip install pytest
+          pytest tests || true
+      - name: Build C++
+        run: |
+          cd src/flight && clang++ -std=c++17 -o AttitudeController AttitudeController.cpp && ./AttitudeController
+      - name: Build GUI (placeholder)
+        run: echo "GUI build stub"
+
+  update-roadmap:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run update_roadmap.py
+        run: |
+          python3 scripts/update_roadmap.py < <(git log -1 --pretty=%B)
+      - name: Commit and push ROADMAP.md if changed
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add ROADMAP.md
+          git diff --cached --quiet || git commit -m "ci: update roadmap [skip ci]"
+          git push 
