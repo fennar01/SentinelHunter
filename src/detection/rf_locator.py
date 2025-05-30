@@ -6,6 +6,8 @@ SentinelHunter Detection Stack
 import math
 import argparse
 import random
+import time
+import csv
 
 
 def simulate_rf_signals_multi(sources, baseline, carrier_freq, velocity, noise_std=1e-8):
@@ -62,6 +64,19 @@ def estimate_bearing_doppler(frequency_rx, frequency_tx, velocity, carrier_frequ
     theta_deg = math.degrees(theta_rad)
     return theta_deg
 
+def log_detection_results(results, filename="detection_log.csv"):
+    with open(filename, "a", newline="") as f:
+        writer = csv.writer(f)
+        for res in results:
+            writer.writerow([
+                res.get('id', ''),
+                res.get('bearing', ''),
+                res.get('tdoa', ''),
+                res.get('frx', ''),
+                res.get('ftx', ''),
+                time.time()
+            ])
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="RF Locator Multi-Source Demo")
     parser.add_argument('--simulate', action='store_true', help='Simulate RF signals for multiple sources')
@@ -79,5 +94,6 @@ if __name__ == "__main__":
             tdoa_bearing = estimate_bearing_tdoa(res['tdoa'], args.baseline)
             doppler_bearing = estimate_bearing_doppler(res['frx'], res['ftx'], args.vel, args.fc)
             print(f"Source {res['id']}: True={res['bearing']} deg | TDOA est={tdoa_bearing:.2f} deg | Doppler est={doppler_bearing:.2f} deg")
+        log_detection_results(results)
     else:
         print("Please use --simulate for multi-source demo.")
