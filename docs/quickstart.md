@@ -32,11 +32,14 @@ $ make sim
 # Start a mesh simulation (3 nodes)
 $ python src/mesh/node.py
 
+# In a separate terminal, run the aggregator for event fusion and GUI visualization
+$ python src/mesh/aggregator.py
+
 # Start the GUI (in a separate terminal)
 $ make gui
 ```
 
-The GUI will connect to the mesh and visualize all nodes and detection events in real time.
+The GUI will connect to the mesh and visualize all nodes, detection events, and high-confidence fusion events in real time.
 
 See [README.md](../README.md) and [ROADMAP.md](../ROADMAP.md) for more details.
 
