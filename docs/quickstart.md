@@ -33,3 +33,5 @@ $ make gui
 ```
 
 See [README.md](../README.md) and [ROADMAP.md](../ROADMAP.md) for more details.
+
+All initial roadmap epics are complete. You can now add new features or iterate on the existing modules.
