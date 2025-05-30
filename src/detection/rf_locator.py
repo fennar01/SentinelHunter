@@ -1,27 +1,28 @@
 """
 rf_locator.py
-Estimate bearing using TDOA and Doppler. Simulate RF signals and noise.
+Estimate bearing using TDOA and Doppler. Simulate RF signals and noise for multiple sources.
 SentinelHunter Detection Stack
 """
 import math
 import argparse
 import random
 
-def simulate_rf_signals(true_bearing_deg, baseline, carrier_freq, velocity, noise_std=1e-8):
+
+def simulate_rf_signals_multi(sources, baseline, carrier_freq, velocity, noise_std=1e-8):
     """
-    Simulate TDOA and Doppler measurements for a given true bearing, with noise.
-    Returns: tdoa (s), frx (Hz), ftx (Hz)
+    Simulate TDOA and Doppler measurements for multiple sources.
+    sources: list of dicts with 'bearing' (deg) and 'id'
+    Returns: list of dicts with tdoa, frx, ftx, id
     """
     c = 299792458
-    # Simulate TDOA: tdoa = (baseline/c) * cos(theta)
-    theta_rad = math.radians(true_bearing_deg)
-    tdoa = (baseline / c) * math.cos(theta_rad)
-    tdoa += random.gauss(0, noise_std)
-    # Simulate Doppler: frx = ftx * (1 + v/c * cos(theta))
-    ftx = carrier_freq
-    frx = ftx * (1 + velocity / c * math.cos(theta_rad))
-    frx += random.gauss(0, 10)  # 10 Hz noise
-    return tdoa, frx, ftx
+    results = []
+    for src in sources:
+        theta_rad = math.radians(src['bearing'])
+        tdoa = (baseline / c) * math.cos(theta_rad) + random.gauss(0, noise_std)
+        ftx = carrier_freq
+        frx = ftx * (1 + velocity / c * math.cos(theta_rad)) + random.gauss(0, 10)
+        results.append({'id': src['id'], 'tdoa': tdoa, 'frx': frx, 'ftx': ftx, 'bearing': src['bearing']})
+    return results
 
 def estimate_bearing_tdoa(tdoa, baseline, c=299792458):
     """
@@ -62,28 +63,21 @@ def estimate_bearing_doppler(frequency_rx, frequency_tx, velocity, carrier_frequ
     return theta_deg
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="RF Locator Demo")
-    parser.add_argument('--simulate', action='store_true', help='Simulate RF signals')
-    parser.add_argument('--bearing', type=float, default=30.0, help='True bearing (deg, for simulation)')
+    parser = argparse.ArgumentParser(description="RF Locator Multi-Source Demo")
+    parser.add_argument('--simulate', action='store_true', help='Simulate RF signals for multiple sources')
+    parser.add_argument('--sources', type=str, default='[{"id":0,"bearing":30},{"id":1,"bearing":60}]', help='JSON list of sources with id and bearing')
     parser.add_argument('--baseline', type=float, help='Baseline (m)', default=1000)
     parser.add_argument('--fc', type=float, help='Carrier freq (Hz)', default=437100000)
     parser.add_argument('--vel', type=float, help='Relative velocity (m/s)', default=7500)
-    parser.add_argument('--tdoa', type=float, help='TDOA (s)')
-    parser.add_argument('--frx', type=float, help='Received freq (Hz)')
-    parser.add_argument('--ftx', type=float, help='Transmitted freq (Hz)')
     args = parser.parse_args()
 
     if args.simulate:
-        tdoa, frx, ftx = simulate_rf_signals(args.bearing, args.baseline, args.fc, args.vel)
-        print(f"Simulated: TDOA={tdoa:.2e} s, frx={frx:.2f} Hz, ftx={ftx:.2f} Hz")
+        import json
+        sources = json.loads(args.sources)
+        results = simulate_rf_signals_multi(sources, args.baseline, args.fc, args.vel)
+        for res in results:
+            tdoa_bearing = estimate_bearing_tdoa(res['tdoa'], args.baseline)
+            doppler_bearing = estimate_bearing_doppler(res['frx'], res['ftx'], args.vel, args.fc)
+            print(f"Source {res['id']}: True={res['bearing']} deg | TDOA est={tdoa_bearing:.2f} deg | Doppler est={doppler_bearing:.2f} deg")
     else:
-        tdoa = args.tdoa
-        frx = args.frx
-        ftx = args.ftx
-        if tdoa is None or frx is None or ftx is None:
-            parser.error('Must provide --tdoa, --frx, and --ftx if not simulating.')
-
-    tdoa_bearing = estimate_bearing_tdoa(tdoa, args.baseline)
-    doppler_bearing = estimate_bearing_doppler(frx, ftx, args.vel, args.fc)
-    print(f"TDOA estimated bearing: {tdoa_bearing:.2f} deg")
-    print(f"Doppler estimated bearing: {doppler_bearing:.2f} deg")
+        print("Please use --simulate for multi-source demo.")
