@@ -1,0 +1,8 @@
+name: SentinelHunter Roadmap
+columns:
+  - name: Backlog
+    cards:
+      - note: "Flight Core: Implement quaternion PID in AttitudeController.cpp (@core-team)"
+      - note: "Detection Stack: Prototype rf_locator.py Doppler solver (@sensor-fusion)"
+      - note: "GUI: Build OrbitView.jsx with CesiumJS demo data (@frontend)"
+      - note: "DevOps: Stand-up GitHub Actions for Linux build + unit tests (@devops)"
