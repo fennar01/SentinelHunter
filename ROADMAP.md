@@ -2,5 +2,5 @@
 |------|-------------|-------|--------|
 | Flight Core | Implement quaternion PID in AttitudeController.cpp | @core-team | ✅ Done |
 | Detection Stack | Prototype rf_locator.py Doppler solver | @sensor-fusion | ✅ Done |
-| GUI | Build OrbitView.jsx with CesiumJS demo data | @frontend | ⏳ Planned |
+| GUI | Build OrbitView.jsx with CesiumJS demo data | @frontend | ✅ Done |
 | DevOps | Stand-up GitHub Actions for Linux build + unit tests | @devops | ✅ Done |
