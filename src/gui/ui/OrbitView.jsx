@@ -4,7 +4,7 @@
 
 /**
  * OrbitView visualises satellite orbits in 3D using CesiumJS.
- * This minimal demo renders a Cesium globe and a hardcoded satellite path.
+ * Loads demo satellite data from a JSON file and plots tracks.
  */
 import React, { useEffect, useRef } from 'react';
 
@@ -12,26 +12,30 @@ export default function OrbitView() {
   const cesiumContainer = useRef(null);
 
   useEffect(() => {
-    // Dynamically import Cesium to avoid SSR issues
-    import('cesium/Cesium').then(Cesium => {
-      // Minimal CesiumJS setup
+    async function loadAndPlot() {
+      // Load demo satellite data
+      const resp = await fetch('/src/gui/data/demo_satellites.json');
+      const sats = await resp.json();
+      const Cesium = await import('cesium/Cesium');
       if (!cesiumContainer.current) return;
       const viewer = new Cesium.Viewer(cesiumContainer.current, {
         timeline: false,
         animation: false,
       });
-      // Add a hardcoded satellite track (polyline)
-      viewer.entities.add({
-        name: 'Demo Satellite Track',
-        polyline: {
-          positions: Cesium.Cartesian3.fromDegreesArray([0, 0, 10, 10, 20, 20, 30, 30]),
-          width: 3,
-          material: Cesium.Color.RED,
-        },
+      sats.forEach(sat => {
+        viewer.entities.add({
+          name: sat.name,
+          polyline: {
+            positions: Cesium.Cartesian3.fromDegreesArrayHeights(sat.track.flat()),
+            width: 3,
+            material: Cesium.Color.YELLOW,
+          },
+        });
       });
       viewer.zoomTo(viewer.entities);
       return () => viewer.destroy();
-    });
+    }
+    loadAndPlot();
   }, []);
 
   return (
