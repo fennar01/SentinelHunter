@@ -5,6 +5,7 @@
 - Python 3.11+
 - Node.js 18+
 - GCC/Clang (for C++17)
+- [ZeroMQ Python bindings](https://pypi.org/project/pyzmq/) (`pip install pyzmq`)
 
 ## Build and Run
 
@@ -28,9 +29,14 @@ $ make lint
 # Run the simulator
 $ make sim
 
-# Start the GUI
+# Start a mesh simulation (3 nodes)
+$ python src/mesh/node.py
+
+# Start the GUI (in a separate terminal)
 $ make gui
 ```
+
+The GUI will connect to the mesh and visualize all nodes and detection events in real time.
 
 See [README.md](../README.md) and [ROADMAP.md](../ROADMAP.md) for more details.
 
